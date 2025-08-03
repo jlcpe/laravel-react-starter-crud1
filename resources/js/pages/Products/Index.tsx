@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Megaphone } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -30,9 +30,11 @@ interface PageProps {
 export default function Index() {
     const { products, flash } = usePage().props as PageProps;
 
+    const {processing, delete: destroy } = useForm();
+
     const handleDelete = (id:number, name:string) => {
         if (confirm(`Are you sure you want to delete the product: ${name}?`)) {
-            
+            destroy(route('products.destroy', id));
         }
     }       
 
@@ -74,7 +76,7 @@ export default function Index() {
                                     <TableCell>{product.price}</TableCell>
                                     <TableCell>{product.description}</TableCell>
                                     <TableCell className="text-center">
-                                        <Button onClick={() => handleDelete(product.id, product.name)} className='bg-red-500 hover:bg-red-700'>Delete</Button>
+                                        <Button disabled={processing} onClick={() => handleDelete(product.id, product.name)} className='bg-red-500 hover:bg-red-700'>Delete</Button>
                                     </TableCell>
                                 </TableRow>
                             ))}
