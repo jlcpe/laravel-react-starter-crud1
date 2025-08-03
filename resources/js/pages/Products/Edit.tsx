@@ -4,34 +4,39 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { CircleAlert } from 'lucide-react';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Create a Product',
-        href: '/products/create',
-    },
-];
 
-export default function Index() {
-    const {data, setData, post, processing, errors} = useForm({
-        name: '',
-        price: '',
-        description: '',
+
+interface Product {
+    id:number,
+    name:string,
+    price:string,
+    description:string
+}
+
+interface Props {
+    product: Product;
+}
+
+export default function Index({product}: Props) {
+    const {data, setData, put, processing, errors} = useForm({
+        name: product.name,
+        price: product.price,
+        description: product.description,
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleUpdate = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('products.store'));
+        put(route('products.update', product.id));
     }
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={[{title: 'Edit Product', href: `/products/${product.id}/edit`}]}>
             <Head title="Create a New Product" />
             <div className="w-8/12 p-4">
-                <form action="" onSubmit={handleSubmit} className="space-y-4">
+                <form action="" onSubmit={handleUpdate} className="space-y-4">
                     {/* Diplay Error  */}
 
                     {Object.keys(errors).length > 0 && (
@@ -65,7 +70,7 @@ export default function Index() {
                             onChange={(e) => setData('description', e.target.value)}
                         ></Textarea>
                     </div>
-                    <Button disabled={processing} type="submit">Add a Product</Button>
+                    <Button disabled={processing} type="submit">Update Product</Button>
                 </form>
             </div>
         </AppLayout>

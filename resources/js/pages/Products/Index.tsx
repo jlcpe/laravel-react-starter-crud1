@@ -1,10 +1,22 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Megaphone } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,15 +40,24 @@ interface PageProps {
 }
 
 export default function Index() {
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const { products, flash } = usePage().props as PageProps;
 
-    const {processing, delete: destroy } = useForm();
+    const { processing, delete: destroy } = useForm();
 
-    const handleDelete = (id:number, name:string) => {
-        if (confirm(`Are you sure you want to delete the product: ${name}?`)) {
-            destroy(route('products.destroy', id));
+    const handleDeleteClick = (product: Product) => {
+        setSelectedProduct(product);
+        setDialogOpen(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (selectedProduct) {
+            destroy(route('products.destroy', selectedProduct.id));
         }
-    }       
+        setDialogOpen(false);
+        setSelectedProduct(null);
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -75,8 +96,17 @@ export default function Index() {
                                     <TableCell>{product.name}</TableCell>
                                     <TableCell>{product.price}</TableCell>
                                     <TableCell>{product.description}</TableCell>
-                                    <TableCell className="text-center">
-                                        <Button disabled={processing} onClick={() => handleDelete(product.id, product.name)} className='bg-red-500 hover:bg-red-700'>Delete</Button>
+                                    <TableCell className="space-x-2 text-center">
+                                        <Link href={route('products.edit', product.id)}>
+                                            <Button className="bg-slate-600 hover:bg-slate-700">Edit</Button>
+                                        </Link>
+                                        <Button
+                                            disabled={processing}
+                                            onClick={() => handleDeleteClick(product)}
+                                            className="bg-red-500 hover:bg-red-700"
+                                        >
+                                            Delete
+                                        </Button>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -84,6 +114,21 @@ export default function Index() {
                     </Table>
                 )}
             </div>
+            <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete{' '}
+                            <span className="font-bold">{selectedProduct?.name}</span> and remove its data from our servers.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setDialogOpen(false)}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleConfirmDelete}>Continue</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </AppLayout>
     );
 }
