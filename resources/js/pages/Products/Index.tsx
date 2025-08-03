@@ -1,6 +1,7 @@
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -13,8 +14,8 @@ export default function Index() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
-            <div >
-                
+            <div className='m-4'>
+                <Link href={route('products.create')}><Button>Create a Product</Button></Link>
             </div>
         </AppLayout>
     );
